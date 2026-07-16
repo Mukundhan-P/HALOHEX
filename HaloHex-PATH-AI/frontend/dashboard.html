@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · HaloHex PATH AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="dashboard">
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="hex-mark"><i class="fa-solid fa-hexagon-nodes"></i></span>
+      HaloHex <span class="brand-accent">PATH AI</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="generate.html" class="sidebar-link" data-page="generate"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Path</a>
+      <a href="progress.html" class="sidebar-link" data-page="progress"><i class="fa-solid fa-chart-line"></i> Roadmap Progress</a>
+      <a href="profile.html" class="sidebar-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutLink" class="sidebar-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area">
+    <div class="topbar">
+      <div>
+        <h1><i class="fa-solid fa-gauge-high"></i> Dashboard</h1>
+        <p class="page-sub">Welcome back, <span data-user="name"></span>.</p>
+      </div>
+      <a href="profile.html" class="user-chip">
+        <span class="avatar-circle" data-user="initials"></span>
+        <span data-user="name"></span>
+      </a>
+    </div>
+
+    <div class="stat-grid">
+      <div class="glass-card stat-card">
+        <span class="stat-label">Overall Progress</span>
+        <span id="dashProgress" class="stat-value"><i class="fa-solid fa-chart-line"></i>0%</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Weeks Completed</span>
+        <span id="dashWeeks" class="stat-value"><i class="fa-solid fa-flag-checkered"></i>0 / 10</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Day Streak</span>
+        <span class="stat-value"><i class="fa-solid fa-fire"></i>5</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Target Goal</span>
+        <span class="stat-value" style="font-size:1.15rem;"><i class="fa-solid fa-bullseye"></i><span data-user="goal"></span></span>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="glass-card">
+        <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Quick actions
+        </h3>
+        <div class="action-list">
+          <a href="generate.html" class="action-row">
+            <span class="action-row-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate a new learning path</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+          <a href="progress.html" class="action-row">
+            <span class="action-row-label"><i class="fa-solid fa-chart-line"></i> Continue this week's topics</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+          <a href="profile.html" class="action-row">
+            <span class="action-row-label"><i class="fa-solid fa-user-pen"></i> Update your goal & pace</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <i class="fa-solid fa-compass" style="color:var(--cyan);"></i> Your current plan
+        </h3>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:0.92rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--muted);">Career goal</span>
+            <strong data-user="goal"></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--muted);">Skill level</span>
+            <strong data-user="skillLevel"></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--muted);">Daily study hours</span>
+            <strong data-user="dailyHours"></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--muted);">Duration</span>
+            <strong><span data-user="duration"></span> months</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Fetch current selected goal
+    const savedGoal = localStorage.getItem("selected_goal");
+    const normalizedUserGoal = getNormalizedGoal(CURRENT_USER.goal);
+    const selectedGoal = savedGoal || normalizedUserGoal;
+
+    // 2. Fetch progress
+    const progress = getRoadmapProgress();
+    const goalProgress = progress[selectedGoal] || { highestUnlockedWeek: 1, scores: {} };
+    
+    // 3. Compute count of completed modules (where a score is saved)
+    let completedCount = 0;
+    for (let k = 1; k <= 10; k++) {
+      if (goalProgress.scores[k] !== undefined) {
+        completedCount++;
+      }
+    }
+    
+    const percent = Math.round((completedCount / 10) * 100);
+    
+    // 4. Update DOM elements
+    document.getElementById("dashProgress").innerHTML = `<i class="fa-solid fa-chart-line"></i>${percent}%`;
+    document.getElementById("dashWeeks").innerHTML = `<i class="fa-solid fa-flag-checkered"></i>${completedCount} / 10`;
+  });
+</script>
+</body>
+</html>

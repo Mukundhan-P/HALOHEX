@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile · HaloHex PATH AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="profile">
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="hex-mark"><i class="fa-solid fa-hexagon-nodes"></i></span>
+      HaloHex <span class="brand-accent">PATH AI</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="generate.html" class="sidebar-link" data-page="generate"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Path</a>
+      <a href="progress.html" class="sidebar-link" data-page="progress"><i class="fa-solid fa-chart-line"></i> Roadmap Progress</a>
+      <a href="profile.html" class="sidebar-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutLink" class="sidebar-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area">
+    <div class="topbar">
+      <div>
+        <h1><i class="fa-solid fa-user"></i> Profile</h1>
+        <p class="page-sub">Your details and learning preferences.</p>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom:22px;">
+      <div class="profile-header">
+        <div class="avatar-circle avatar-circle-lg" data-user="initials"></div>
+        <div>
+          <div class="profile-name" data-user="name"></div>
+          <div class="profile-meta" data-user="email"></div>
+          <div class="profile-meta">Member since <span data-user="memberSince"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+
+      <div class="glass-card">
+        <div class="profile-card-section">
+          <h3 style="margin-bottom:16px;"><i class="fa-solid fa-bullseye" style="color:var(--cyan);"></i> Learning preferences</h3>
+          <form id="preferencesForm">
+            <div class="field">
+              <label for="goalInput">Career goal</label>
+              <select id="goalInput">
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="skillInput">Skill level</label>
+                <select id="skillInput">
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="hoursInput">Daily hours</label>
+                <input type="number" id="hoursInput" min="1" max="24" />
+              </div>
+              <div class="field">
+                <label for="durationInput">Duration (months)</label>
+                <input type="number" id="durationInput" min="1" max="36" />
+              </div>
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+              <i class="fa-solid fa-floppy-disk"></i> Save preferences
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="profile-card-section">
+          <h3 style="margin-bottom:16px;"><i class="fa-solid fa-lock" style="color:var(--cyan);"></i> Account settings</h3>
+          <form id="accountForm">
+            <div class="field">
+              <label for="nameInput">Full name</label>
+              <input type="text" id="nameInput" />
+            </div>
+            <div class="field">
+              <label for="emailInput">Email</label>
+              <input type="email" id="emailInput" />
+            </div>
+            <div class="field">
+              <label for="newPassword">New password</label>
+              <input type="password" id="newPassword" placeholder="Leave blank to keep current password" />
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+              <i class="fa-solid fa-floppy-disk"></i> Save account details
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  /* ---------------------------------------------------------------
+     PLACEHOLDER PROFILE LOGIC — there is no auth/profile backend
+     yet, so form values are simply loaded from CURRENT_USER (in
+     app.js) and "saving" just updates that in-memory object plus
+     shows a confirmation toast.
+
+     To make this real:
+       - GET the profile from something like GET /me on page load.
+       - On submit, PATCH /me (account) and PATCH /me/preferences
+         (learning goal/level/hours/duration) instead of only
+         updating CURRENT_USER locally.
+     --------------------------------------------------------------- */
+
+  function prefillProfileForms() {
+    const savedGoal = localStorage.getItem("selected_goal");
+    const normalizedUserGoal = getNormalizedGoal(CURRENT_USER.goal);
+    const selectedGoal = savedGoal || normalizedUserGoal;
+
+    document.getElementById("goalInput").value = selectedGoal;
+    document.getElementById("skillInput").value = CURRENT_USER.skillLevel;
+    document.getElementById("hoursInput").value = CURRENT_USER.dailyHours;
+    document.getElementById("durationInput").value = CURRENT_USER.duration;
+
+    document.getElementById("nameInput").value = CURRENT_USER.name;
+    document.getElementById("emailInput").value = CURRENT_USER.email;
+  }
+
+  document.getElementById("preferencesForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const newGoal = document.getElementById("goalInput").value;
+    
+    // Save to local storage goal state
+    localStorage.setItem("selected_goal", newGoal);
+    
+    CURRENT_USER.goal = newGoal;
+    CURRENT_USER.skillLevel = document.getElementById("skillInput").value;
+    CURRENT_USER.dailyHours = parseInt(document.getElementById("hoursInput").value, 10);
+    CURRENT_USER.duration = parseInt(document.getElementById("durationInput").value, 10);
+    
+    saveCurrentUser(CURRENT_USER);
+    showToast("Learning preferences updated.");
+  });
+
+  document.getElementById("accountForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    CURRENT_USER.name = document.getElementById("nameInput").value.trim();
+    CURRENT_USER.email = document.getElementById("emailInput").value.trim();
+    
+    saveCurrentUser(CURRENT_USER);
+    hydrateUserChips();
+    showToast("Account details updated.");
+    document.getElementById("newPassword").value = "";
+  });
+
+  document.addEventListener("DOMContentLoaded", prefillProfileForms);
+</script>
+</body>
+</html>

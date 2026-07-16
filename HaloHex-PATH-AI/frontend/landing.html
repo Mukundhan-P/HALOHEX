@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HaloHex PATH AI — AI-Powered Personalized Learning Paths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="hex-mark"><i class="fa-solid fa-hexagon-nodes"></i></span>
+    HaloHex <span class="brand-accent">PATH AI</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <a href="login.html" class="btn-secondary" style="margin:0; padding:10px 22px;">Log in</a>
+    <a href="register.html" class="btn-primary" style="padding:10px 22px; font-size:0.9rem;">
+      Get Started <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="hero">
+  <div class="hero-content">
+    <p class="eyebrow">AI-Powered Personalized Learning Path Generator</p>
+    <h1>Your next skill,<br><span class="grad-text">mapped hex by hex.</span></h1>
+    <p class="hero-sub">
+      Tell us where you want to go. HaloHex plots a week-by-week route —
+      topics in the right order, real resources, real projects — paced to
+      exactly how much time you have. Then it tracks your progress the
+      whole way there.
+    </p>
+    <a href="register.html" class="btn-primary">
+      <i class="fa-solid fa-route"></i> Generate My Learning Path
+    </a>
+
+    <div class="hero-path" aria-hidden="true">
+      <svg viewBox="0 0 640 120" class="hex-path-svg">
+        <polyline class="hex-path-line" points="20,90 120,40 220,80 320,30 420,70 520,25 610,60"></polyline>
+        <g class="hex-nodes">
+          <circle cx="20" cy="90" r="7"></circle>
+          <circle cx="120" cy="40" r="7"></circle>
+          <circle cx="220" cy="80" r="7"></circle>
+          <circle cx="320" cy="30" r="7"></circle>
+          <circle cx="420" cy="70" r="7"></circle>
+          <circle cx="520" cy="25" r="7"></circle>
+          <circle cx="610" cy="60" r="9" class="hex-node-final"></circle>
+        </g>
+      </svg>
+      <span class="hero-path-label start">You are here</span>
+      <span class="hero-path-label end">Career-ready</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" style="max-width:1080px;">
+  <div class="results-grid">
+    <div class="glass-card result-card">
+      <h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Personalized Roadmaps</h3>
+      <p class="card-note">Your goal, skill level, and daily hours shape a roadmap built specifically for you — not a generic course list.</p>
+    </div>
+    <div class="glass-card result-card">
+      <h3><i class="fa-solid fa-chart-line"></i> Track Real Progress</h3>
+      <p class="card-note">Check off topics week by week and watch your completion ring fill in as you move closer to career-ready.</p>
+    </div>
+    <div class="glass-card result-card">
+      <h3><i class="fa-solid fa-book-open"></i> Curated Resources & Projects</h3>
+      <p class="card-note">Every roadmap ships with hand-picked docs, channels, practice sites, and mini projects — plus one capstone to show off.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section" style="text-align:center; max-width:700px;">
+  <div class="glass-card">
+    <h2 style="margin-bottom:10px;">Ready to plot your path?</h2>
+    <p class="section-sub">It takes less than a minute to get your first roadmap.</p>
+    <a href="register.html" class="btn-primary">
+      <i class="fa-solid fa-hexagon-nodes"></i> Create Free Account
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  Built for hackathon demo · HaloHex PATH AI
+</footer>
+
+</body>
+</html>

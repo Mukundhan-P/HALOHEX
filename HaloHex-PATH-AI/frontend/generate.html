@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Generate Path · HaloHex PATH AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="generate">
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="hex-mark"><i class="fa-solid fa-hexagon-nodes"></i></span>
+      HaloHex <span class="brand-accent">PATH AI</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="generate.html" class="sidebar-link" data-page="generate"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Path</a>
+      <a href="progress.html" class="sidebar-link" data-page="progress"><i class="fa-solid fa-chart-line"></i> Roadmap Progress</a>
+      <a href="profile.html" class="sidebar-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutLink" class="sidebar-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area">
+    <div class="topbar">
+      <div>
+        <h1><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Learning Path</h1>
+        <p class="page-sub">A few details and the AI will build your roadmap.</p>
+      </div>
+      <a href="profile.html" class="user-chip">
+        <span class="avatar-circle" data-user="initials"></span>
+        <span data-user="name"></span>
+      </a>
+    </div>
+
+    <!-- ============ FORM SECTION ============ -->
+    <section id="formSection">
+      <div class="glass-card form-card">
+        <form id="roadmapForm">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input type="text" id="name" placeholder="e.g. Ananya" required />
+          </div>
+
+          <div class="field">
+            <label for="goal">Career goal</label>
+            <input type="text" id="goal" placeholder="e.g. Machine Learning Engineer" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="skillLevel">Current skill level</label>
+              <select id="skillLevel" required>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="dailyHours">Daily study hours</label>
+              <input type="number" id="dailyHours" min="1" max="24" value="2" required />
+            </div>
+
+            <div class="field">
+              <label for="duration">Duration (months)</label>
+              <input type="number" id="duration" min="1" max="36" value="6" required />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block" id="submitBtn">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Learning Path
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ LOADING ============ -->
+    <section id="loadingSection" style="display:none;">
+      <div class="glass-card loading-card">
+        <div class="hex-spinner">
+          <div class="hex-spinner-cell c1"></div>
+          <div class="hex-spinner-cell c2"></div>
+          <div class="hex-spinner-cell c3"></div>
+        </div>
+        <p class="loading-text">Charting your route through <span id="loadingGoal">your field</span>&hellip;</p>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section id="resultsSection" style="display:none;">
+
+      <div class="result-header" style="text-align:left; margin-bottom:20px;">
+        <h2 style="justify-content:flex-start;"><i class="fa-solid fa-map-location-dot"></i> <span id="resultName">Your</span> Learning Path</h2>
+        <p class="section-sub" id="motivationMessage"></p>
+      </div>
+
+      <div class="results-grid">
+
+        <div class="glass-card result-card wide">
+          <h3><i class="fa-solid fa-hexagon-nodes-bolt"></i> Week-by-Week Roadmap</h3>
+          <p class="card-note" id="weeklySummary"></p>
+          <div class="roadmap-list" id="roadmapList"></div>
+        </div>
+
+        <div class="glass-card result-card">
+          <h3><i class="fa-solid fa-book-open"></i> Recommended Resources</h3>
+          <div id="resourcesList"></div>
+        </div>
+
+        <div class="glass-card result-card">
+          <h3><i class="fa-solid fa-code"></i> Mini Projects</h3>
+          <div id="projectsList"></div>
+        </div>
+
+        <div class="glass-card result-card">
+          <h3><i class="fa-solid fa-trophy"></i> Final Capstone Project</h3>
+          <p id="finalProject"></p>
+        </div>
+
+        <div class="glass-card result-card">
+          <h3><i class="fa-solid fa-calendar-check"></i> Estimated Completion</h3>
+          <p id="estimatedCompletion"></p>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:14px; flex-wrap:wrap;">
+        <a href="progress.html" class="btn-primary" style="margin-top:24px;">
+          <i class="fa-solid fa-chart-line"></i> Track Progress
+        </a>
+        <button class="btn-secondary" id="restartBtn" style="margin:24px 0 0;">
+          <i class="fa-solid fa-arrow-rotate-left"></i> Plan Another Path
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

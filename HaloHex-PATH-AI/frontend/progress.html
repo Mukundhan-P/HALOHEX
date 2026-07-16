@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roadmap Progress · HaloHex PATH AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="progress">
+
+<div class="hex-bg" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="hex-mark"><i class="fa-solid fa-hexagon-nodes"></i></span>
+      HaloHex <span class="brand-accent">PATH AI</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="generate.html" class="sidebar-link" data-page="generate"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Path</a>
+      <a href="progress.html" class="sidebar-link" data-page="progress"><i class="fa-solid fa-chart-line"></i> Roadmap Progress</a>
+      <a href="profile.html" class="sidebar-link" data-page="profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutLink" class="sidebar-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area">
+    <div class="topbar">
+      <div>
+        <h1 id="roadmapTitle">My Learning Roadmap</h1>
+        <p id="roadmapSubtitle" class="page-sub">Machine Learning Engineer Learning Path</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="goal-select-container" style="margin-bottom:0;">
+          <select id="goalSelect" class="goal-select-dropdown">
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Full Stack Developer">Full Stack Developer</option>
+          </select>
+        </div>
+        <a href="profile.html" class="user-chip">
+          <span class="avatar-circle" data-user="initials"></span>
+          <span data-user="name"></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Stat Grid -->
+    <div class="stat-grid" style="margin-bottom:22px;">
+      <div class="glass-card stat-card">
+        <span class="stat-label">Total Weeks</span>
+        <span id="statWeeks" class="stat-value">16</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Modules</span>
+        <span id="statModules" class="stat-value">10</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Estimated Hours</span>
+        <span id="statHours" class="stat-value">113h</span>
+      </div>
+      <div class="glass-card stat-card">
+        <span class="stat-label">Adaptations</span>
+        <span id="statAdaptations" class="stat-value">0</span>
+      </div>
+    </div>
+
+    <!-- Overall Progress Card -->
+    <div class="glass-card" style="margin-bottom:22px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="font-size:1.15rem; font-weight:700;">Overall Progress</h3>
+        <span id="moduleProgressLabel" style="font-weight:700; font-size:0.92rem; color:var(--cyan);">0/10 modules</span>
+      </div>
+      <div style="font-size:0.85rem; color:var(--muted); margin-bottom:10px;">Progress</div>
+      <div class="progress-bar-track" style="height:12px; margin-top:0;">
+        <div class="progress-bar-fill" id="progressBarFill" style="width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- Weekly Modules Section -->
+    <div class="glass-card">
+      <h3 style="margin-bottom:20px; font-family:'Sora',sans-serif; font-weight:700; display:flex; align-items:center; gap:10px;">
+        <i class="fa-solid fa-graduation-cap" style="color:var(--cyan);"></i> Weekly Modules
+      </h3>
+      <div id="modulesContainer" class="modules-container"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ QUIZ MODAL ============ -->
+<div id="quizOverlay" class="quiz-overlay">
+  <div class="glass-card quiz-modal-card">
+    <div class="quiz-modal-header">
+      <div class="quiz-modal-title-wrap">
+        <span id="quizModuleWeek" class="quiz-modal-subtitle">WEEK 1 ASSESSMENT</span>
+        <span id="quizModuleTitle" class="quiz-modal-title">Python Fundamentals Quiz</span>
+      </div>
+      <button id="closeQuizBtn" class="quiz-modal-close-btn" aria-label="Close Quiz">&times;</button>
+    </div>
+    
+    <!-- Progress Indicator -->
+    <div class="quiz-progress-bar">
+      <div id="quizProgressFill" class="quiz-progress-fill"></div>
+    </div>
+    
+    <!-- Question Display -->
+    <div id="quizQuestionBody" class="quiz-question-container">
+      <div id="quizQuestionText" class="quiz-question-text">
+        1. Loading question...
+      </div>
+      <div id="quizOptionsList" class="quiz-options-list">
+        <!-- Option buttons dynamically generated -->
+      </div>
+    </div>
+    
+    <!-- Results Display (Initially hidden) -->
+    <div id="quizResultsView" class="quiz-results-view" style="display:none;">
+      <div id="quizResultIcon" class="quiz-results-badge passed">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <div class="quiz-results-score-wrap">
+        <div id="quizResultPercent" class="quiz-results-score-percent passed">80%</div>
+        <div id="quizResultFraction" class="quiz-results-score-fraction">4 / 5 Correct</div>
+      </div>
+      <div id="quizResultTitle" class="quiz-results-title">Assessment Passed!</div>
+      <p id="quizResultDesc" class="quiz-results-desc">
+        Great job! You have passed the quiz assessment and unlocked the next module.
+      </p>
+    </div>
+    
+    <div class="quiz-modal-footer">
+      <button id="quizPrevBtn" class="quiz-btn-prev"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+      <button id="quizNextBtn" class="btn-primary quiz-btn-next">Next <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<script src="roadmapData.js"></script>
+<script src="app.js"></script>
+<script>
+  let selectedGoal = "";
+  let roadmapProgress = {};
+  let currentGoalData = {};
+  
+  // Quiz states
+  let quizModuleIndex = -1;
+  let quizQuestionIndex = -1;
+  let quizAnswers = [];
+  let quizQuestions = [];
+
+  // DOM Elements
+  const goalSelect = document.getElementById("goalSelect");
+  const roadmapTitle = document.getElementById("roadmapTitle");
+  const roadmapSubtitle = document.getElementById("roadmapSubtitle");
+  const statWeeks = document.getElementById("statWeeks");
+  const statModules = document.getElementById("statModules");
+  const statHours = document.getElementById("statHours");
+  const statAdaptations = document.getElementById("statAdaptations");
+  const moduleProgressLabel = document.getElementById("moduleProgressLabel");
+  const progressBarFill = document.getElementById("progressBarFill");
+  const modulesContainer = document.getElementById("modulesContainer");
+
+  // Quiz Modal DOM Elements
+  const quizOverlay = document.getElementById("quizOverlay");
+  const closeQuizBtn = document.getElementById("closeQuizBtn");
+  const quizModuleWeek = document.getElementById("quizModuleWeek");
+  const quizModuleTitle = document.getElementById("quizModuleTitle");
+  const quizProgressFill = document.getElementById("quizProgressFill");
+  const quizQuestionBody = document.getElementById("quizQuestionBody");
+  const quizQuestionText = document.getElementById("quizQuestionText");
+  const quizOptionsList = document.getElementById("quizOptionsList");
+  const quizResultsView = document.getElementById("quizResultsView");
+  const quizResultIcon = document.getElementById("quizResultIcon");
+  const quizResultPercent = document.getElementById("quizResultPercent");
+  const quizResultFraction = document.getElementById("quizResultFraction");
+  const quizResultTitle = document.getElementById("quizResultTitle");
+  const quizResultDesc = document.getElementById("quizResultDesc");
+  const quizPrevBtn = document.getElementById("quizPrevBtn");
+  const quizNextBtn = document.getElementById("quizNextBtn");
+
+  function initPage() {
+    // 1. Determine career goal path
+    const savedGoal = localStorage.getItem("selected_goal");
+    const normalizedUserGoal = getNormalizedGoal(CURRENT_USER.goal);
+    selectedGoal = savedGoal || normalizedUserGoal;
+    
+    // Set selection in dropdown
+    goalSelect.value = selectedGoal;
+    
+    // Sync current user goal just in case
+    if (CURRENT_USER.goal !== selectedGoal) {
+      CURRENT_USER.goal = selectedGoal;
+      saveCurrentUser(CURRENT_USER);
+    }
+
+    // 2. Fetch progress
+    roadmapProgress = getRoadmapProgress();
+    
+    // 3. Load career path curriculum
+    currentGoalData = ROADMAP_DATA[selectedGoal];
+    
+    // Update titles and stats
+    roadmapTitle.textContent = "My Learning Roadmap";
+    roadmapSubtitle.textContent = currentGoalData.title;
+    
+    statWeeks.textContent = currentGoalData.totalWeeks;
+    statModules.textContent = currentGoalData.modulesCount;
+    statHours.textContent = currentGoalData.estimatedHours + "h";
+    
+    // Let's count goals changes as adaptations
+    let adaptationsCount = parseInt(localStorage.getItem("halohex_adaptations") || "0", 10);
+    statAdaptations.textContent = adaptationsCount;
+
+    // 4. Render checklist and modules
+    renderModules();
+    updateOverallProgress();
+  }
+
+  function renderModules() {
+    modulesContainer.innerHTML = "";
+    const modules = currentGoalData.modules;
+    const progress = roadmapProgress[selectedGoal] || { highestUnlockedWeek: 1, scores: {} };
+    const highestUnlocked = progress.highestUnlockedWeek;
+
+    modules.forEach((mod, idx) => {
+      const week = mod.week;
+      const score = progress.scores[week];
+      const isCompleted = score !== undefined;
+      const isAvailable = week === highestUnlocked && !isCompleted;
+      const isLocked = week > highestUnlocked;
+
+      // Status text & class
+      let statusText = "Locked";
+      let badgeClass = "badge-locked";
+      let statusIcon = '<i class="fa-solid fa-lock"></i>';
+      let cardClass = "locked";
+
+      if (isCompleted) {
+        statusText = "Completed";
+        badgeClass = "badge-completed";
+        statusIcon = '<i class="fa-solid fa-circle-check"></i>';
+        cardClass = "completed";
+      } else if (isAvailable) {
+        statusText = "Available";
+        badgeClass = "badge-available";
+        statusIcon = '<i class="fa-solid fa-play"></i>';
+        cardClass = "available";
+      }
+
+      const card = document.createElement("div");
+      card.className = `module-card ${cardClass}`;
+      card.id = `module-card-${week}`;
+
+      // Build topic elements
+      let topicsHtml = "";
+      mod.topics.forEach((topic) => {
+        topicsHtml += `
+          <div class="topic-card">
+            <div class="topic-card-left">
+              <i class="fa-regular fa-file-lines"></i>
+              <span>${topic.name}</span>
+            </div>
+            <span class="topic-duration">${topic.duration}</span>
+          </div>
+        `;
+      });
+
+      // Build quiz action section
+      let quizActionHtml = "";
+      if (isCompleted) {
+        quizActionHtml = `
+          <div class="quiz-action-bar">
+            <span class="quiz-status-msg passed">
+              <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+              Assessment Passed with <strong>${score}%</strong>
+            </span>
+            <button class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="startQuiz(${idx}, true)">
+              <i class="fa-solid fa-rotate-left"></i> Retake Assessment
+            </button>
+          </div>
+        `;
+      } else if (isAvailable) {
+        quizActionHtml = `
+          <div class="quiz-action-bar">
+            <span class="quiz-status-msg">
+              <i class="fa-solid fa-circle-info" style="color:var(--cyan);"></i>
+              Complete module study then take the assessment quiz.
+            </span>
+            <button class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="startQuiz(${idx}, false)">
+              <i class="fa-solid fa-circle-question"></i> Take Assessment
+            </button>
+          </div>
+        `;
+      } else {
+        quizActionHtml = `
+          <div class="quiz-action-bar">
+            <span class="quiz-status-msg">
+              <i class="fa-solid fa-lock" style="color:var(--muted);"></i>
+              Unlock this module by passing the Week ${week - 1} assessment.
+            </span>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="module-header" onclick="toggleExpand(${week})">
+          <div class="module-header-left">
+            <div class="module-icon-wrap">
+              ${statusIcon}
+            </div>
+            <div class="module-info-main">
+              <div class="module-meta-top">
+                <span class="module-week-tag">Wk ${week}</span>
+                <span class="module-badge ${badgeClass}">${statusText}</span>
+                <span class="module-category">${mod.category}</span>
+              </div>
+              <div class="module-title">${mod.title}</div>
+              <p class="module-desc">${mod.description}</p>
+            </div>
+          </div>
+          <div class="module-header-right">
+            <div class="module-duration-info">
+              <span><i class="fa-regular fa-clock"></i> ${mod.estimatedHours}h est.</span>
+              <span><i class="fa-regular fa-folder-open"></i> ${mod.topics.length} topics</span>
+            </div>
+            <div class="module-chevron">
+              <i class="fa-solid fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+        <div class="module-body-wrap">
+          <div class="module-body">
+            <div class="topics-title">Topics Covered</div>
+            <div class="topics-grid">
+              ${topicsHtml}
+            </div>
+            ${quizActionHtml}
+          </div>
+        </div>
+      `;
+
+      modulesContainer.appendChild(card);
+      
+      // Auto expand the available module
+      if (isAvailable) {
+        card.classList.add("expanded");
+      }
+    });
+  }
+
+  function toggleExpand(week) {
+    const card = document.getElementById(`module-card-${week}`);
+    if (!card || card.classList.contains("locked")) return;
+    
+    // Toggle expand state
+    card.classList.toggle("expanded");
+  }
+
+  function updateOverallProgress() {
+    const modules = currentGoalData.modules;
+    const progress = roadmapProgress[selectedGoal] || { highestUnlockedWeek: 1, scores: {} };
+    
+    let completedCount = 0;
+    modules.forEach((mod) => {
+      if (progress.scores[mod.week] !== undefined) {
+        completedCount++;
+      }
+    });
+
+    const totalCount = modules.length;
+    const percent = Math.round((completedCount / totalCount) * 100);
+
+    moduleProgressLabel.textContent = `${completedCount}/${totalCount} modules`;
+    progressBarFill.style.width = `${percent}%`;
+  }
+
+  // Dropdown Goal Selection Change handler
+  goalSelect.addEventListener("change", (e) => {
+    const newGoal = e.target.value;
+    
+    // Log adaptations
+    let adaptationsCount = parseInt(localStorage.getItem("halohex_adaptations") || "0", 10);
+    adaptationsCount++;
+    localStorage.setItem("halohex_adaptations", adaptationsCount);
+    
+    localStorage.setItem("selected_goal", newGoal);
+    CURRENT_USER.goal = newGoal;
+    saveCurrentUser(CURRENT_USER);
+    
+    initPage();
+    showToast(`Switched career path to ${newGoal}`);
+  });
+
+  // QUIZ SYSTEM LOGIC
+  function startQuiz(moduleIndex, isRetake) {
+    quizModuleIndex = moduleIndex;
+    const moduleData = currentGoalData.modules[moduleIndex];
+    quizQuestions = moduleData.quiz;
+    quizQuestionIndex = 0;
+    
+    // Initialize answers as empty
+    quizAnswers = new Array(quizQuestions.length).fill(-1);
+
+    // Setup modal header texts
+    quizModuleWeek.textContent = `WEEK ${moduleData.week} ASSESSMENT`;
+    quizModuleTitle.textContent = `${moduleData.title} Quiz`;
+
+    // Reset views
+    quizQuestionBody.style.display = "block";
+    quizResultsView.style.display = "none";
+    quizPrevBtn.style.display = "flex";
+    quizNextBtn.innerHTML = `Next <i class="fa-solid fa-arrow-right"></i>`;
+    quizNextBtn.onclick = handleQuizNext;
+
+    renderQuizQuestion();
+
+    // Show modal overlay
+    quizOverlay.classList.add("active");
+  }
+
+  function renderQuizQuestion() {
+    const question = quizQuestions[quizQuestionIndex];
+    
+    // Update progress bar
+    const progressPercent = ((quizQuestionIndex) / quizQuestions.length) * 100;
+    quizProgressFill.style.width = `${progressPercent}%`;
+
+    // Render text
+    quizQuestionText.textContent = `${quizQuestionIndex + 1}. ${question.question}`;
+
+    // Render options
+    quizOptionsList.innerHTML = "";
+    question.options.forEach((opt, idx) => {
+      const letter = String.fromCharCode(65 + idx); // A, B, C, D
+      const isSelected = quizAnswers[quizQuestionIndex] === idx;
+      
+      const btn = document.createElement("button");
+      btn.className = `quiz-option-button ${isSelected ? 'selected' : ''}`;
+      btn.innerHTML = `
+        <div class="quiz-option-circle">${letter}</div>
+        <span>${escapeHtml(opt)}</span>
+      `;
+      btn.onclick = () => selectQuizOption(idx);
+      quizOptionsList.appendChild(btn);
+    });
+
+    // Update buttons
+    quizPrevBtn.disabled = quizQuestionIndex === 0;
+    if (quizQuestionIndex === quizQuestions.length - 1) {
+      quizNextBtn.innerHTML = `Submit <i class="fa-solid fa-check"></i>`;
+    } else {
+      quizNextBtn.innerHTML = `Next <i class="fa-solid fa-arrow-right"></i>`;
+    }
+  }
+
+  function selectQuizOption(optionIndex) {
+    quizAnswers[quizQuestionIndex] = optionIndex;
+    renderQuizQuestion();
+  }
+
+  quizPrevBtn.onclick = () => {
+    if (quizQuestionIndex > 0) {
+      quizQuestionIndex--;
+      renderQuizQuestion();
+    }
+  };
+
+  function handleQuizNext() {
+    // Check if an option is selected
+    if (quizAnswers[quizQuestionIndex] === -1) {
+      showToast("Please select an answer option.", "fa-circle-exclamation");
+      return;
+    }
+
+    if (quizQuestionIndex < quizQuestions.length - 1) {
+      quizQuestionIndex++;
+      renderQuizQuestion();
+    } else {
+      submitQuiz();
+    }
+  }
+
+  function submitQuiz() {
+    let score = 0;
+    quizQuestions.forEach((q, i) => {
+      if (quizAnswers[i] === q.answer) {
+        score++;
+      }
+    });
+
+    const percent = Math.round((score / quizQuestions.length) * 100);
+    const passed = percent >= 80;
+    const week = currentGoalData.modules[quizModuleIndex].week;
+
+    // Show results
+    quizQuestionBody.style.display = "none";
+    quizResultsView.style.display = "flex";
+    quizPrevBtn.style.display = "none";
+    quizProgressFill.style.width = "100%";
+
+    if (passed) {
+      // Record completed state
+      const progress = getRoadmapProgress();
+      progress[selectedGoal].scores[week] = percent;
+
+      // If they passed the active highestUnlocked module, unlock next one!
+      if (week === progress[selectedGoal].highestUnlockedWeek && week < 10) {
+        progress[selectedGoal].highestUnlockedWeek = week + 1;
+      }
+      
+      saveRoadmapProgress(progress);
+      roadmapProgress = progress; // Update local copy
+
+      // UI
+      quizResultIcon.className = "quiz-results-badge passed";
+      quizResultIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+      quizResultPercent.className = "quiz-results-score-percent passed";
+      quizResultPercent.textContent = `${percent}%`;
+      quizResultFraction.textContent = `${score} / ${quizQuestions.length} Correct`;
+      quizResultTitle.textContent = "Assessment Passed!";
+      quizResultDesc.textContent = `Excellent job! You successfully passed the assessment and unlocked the next module.`;
+      
+      quizNextBtn.innerHTML = `Finish <i class="fa-solid fa-circle-xmark"></i>`;
+      quizNextBtn.onclick = closeQuizModal;
+    } else {
+      // Failed
+      quizResultIcon.className = "quiz-results-badge failed";
+      quizResultIcon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+      quizResultPercent.className = "quiz-results-score-percent failed";
+      quizResultPercent.textContent = `${percent}%`;
+      quizResultFraction.textContent = `${score} / ${quizQuestions.length} Correct`;
+      quizResultTitle.textContent = "Assessment Failed";
+      quizResultDesc.textContent = `You scored ${percent}%. You need at least 80% (4 correct answers) to pass and move on. Please review the topics and try again!`;
+      
+      quizNextBtn.innerHTML = `Retake Quiz <i class="fa-solid fa-rotate-left"></i>`;
+      quizNextBtn.onclick = () => {
+        startQuiz(quizModuleIndex, false);
+      };
+    }
+  }
+
+  function closeQuizModal() {
+    quizOverlay.classList.remove("active");
+    // Reload state and modules
+    initPage();
+  }
+
+  closeQuizBtn.onclick = () => {
+    quizOverlay.classList.remove("active");
+    initPage();
+  };
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.addEventListener("DOMContentLoaded", initPage);
+</script>
+</body>
+</html>
