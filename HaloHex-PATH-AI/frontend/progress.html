@@ -186,6 +186,73 @@
   const quizPrevBtn = document.getElementById("quizPrevBtn");
   const quizNextBtn = document.getElementById("quizNextBtn");
 
+  function generateDynamicCurriculum(baseGoalData, numWeeks) {
+    const allTopics = [];
+    baseGoalData.modules.forEach(m => {
+      m.topics.forEach(t => {
+        allTopics.push({
+          topic: t,
+          moduleIndex: m.week - 1
+        });
+      });
+    });
+
+    const numTopics = allTopics.length;
+    const newModules = [];
+
+    const moduleCounts = new Array(baseGoalData.modules.length).fill(0);
+    const weekModuleMappings = [];
+    for (let w = 0; w < numWeeks; w++) {
+      const mIdx = Math.floor((w + 0.5) * baseGoalData.modules.length / numWeeks);
+      weekModuleMappings.push(mIdx);
+      moduleCounts[mIdx]++;
+    }
+
+    const moduleTrackers = new Array(baseGoalData.modules.length).fill(0);
+
+    for (let w = 0; w < numWeeks; w++) {
+      const origModuleIdx = weekModuleMappings[w];
+      const origModule = baseGoalData.modules[origModuleIdx];
+
+      const startIdx = Math.floor(w * numTopics / numWeeks);
+      const endIdx = Math.floor((w + 1) * numTopics / numWeeks);
+      const weekTopics = allTopics.slice(startIdx, endIdx).map(x => x.topic);
+
+      let title = origModule.title;
+      if (moduleCounts[origModuleIdx] > 1) {
+        moduleTrackers[origModuleIdx]++;
+        title += ` - Part ${moduleTrackers[origModuleIdx]}`;
+      }
+
+      const defaultDailyHours = CURRENT_USER.dailyHours || 2;
+      const defaultDays = CURRENT_USER.daysPerWeek || 5;
+      const estHours = Math.round(defaultDailyHours * defaultDays);
+
+      newModules.push({
+        week: w + 1,
+        title: title,
+        category: origModule.category,
+        description: origModule.description,
+        estimatedHours: estHours,
+        topics: weekTopics,
+        quiz: origModule.quiz
+      });
+    }
+
+    const dailyHours = CURRENT_USER.dailyHours || 2;
+    const daysPerWeek = CURRENT_USER.daysPerWeek || 5;
+    const totalCurriculumHours = Math.round(dailyHours * daysPerWeek * numWeeks);
+
+    return {
+      title: baseGoalData.title,
+      totalWeeks: numWeeks,
+      modulesCount: numWeeks,
+      estimatedHours: totalCurriculumHours,
+      category: baseGoalData.category,
+      modules: newModules
+    };
+  }
+
   function initPage() {
     // 1. Determine career goal path
     const savedGoal = localStorage.getItem("selected_goal");
@@ -205,7 +272,9 @@
     roadmapProgress = getRoadmapProgress();
     
     // 3. Load career path curriculum
-    currentGoalData = ROADMAP_DATA[selectedGoal];
+    const durationWeeks = CURRENT_USER.durationWeeks || 16;
+    const baseGoalData = ROADMAP_DATA[selectedGoal];
+    currentGoalData = generateDynamicCurriculum(baseGoalData, durationWeeks);
     
     // Update titles and stats
     roadmapTitle.textContent = "My Learning Roadmap";
@@ -354,7 +423,164 @@
         card.classList.add("expanded");
       }
     });
+
+    // Render the Final Graded Assessment card
+    renderFinalAssessment();
   }
+
+  function renderFinalAssessment() {
+    const progress = getRoadmapProgress();
+    const finalScore = progress[selectedGoal] ? progress[selectedGoal].finalAssessmentScore : undefined;
+    const modules = currentGoalData.modules;
+    
+    // Check if all weekly modules are completed
+    let completedCount = 0;
+    modules.forEach((mod) => {
+      if (progress[selectedGoal] && progress[selectedGoal].scores[mod.week] !== undefined) {
+        completedCount++;
+      }
+    });
+    
+    const isUnlocked = completedCount === modules.length;
+    const isCompleted = finalScore !== undefined && finalScore >= 70;
+    
+    let statusText = "Locked";
+    let badgeClass = "badge-locked";
+    let statusIcon = '<i class="fa-solid fa-lock"></i>';
+    let cardClass = "locked";
+    let actionHtml = "";
+
+    if (isCompleted) {
+      statusText = `Passed with ${finalScore}%`;
+      badgeClass = "badge-completed";
+      statusIcon = '<i class="fa-solid fa-trophy" style="color:var(--cyan);"></i>';
+      cardClass = "completed";
+      actionHtml = `
+        <div class="quiz-action-bar">
+          <span class="quiz-status-msg passed">
+            <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+            Comprehensive Graded Assessment Passed with <strong>${finalScore}%</strong>!
+          </span>
+          <button class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="startFinalAssessment(true)">
+            <i class="fa-solid fa-rotate-left"></i> Retake Assessment
+          </button>
+        </div>
+      `;
+    } else if (isUnlocked) {
+      statusText = finalScore !== undefined ? `Failed (${finalScore}%)` : "Available";
+      badgeClass = finalScore !== undefined ? "badge-locked" : "badge-available";
+      statusIcon = '<i class="fa-solid fa-star" style="color:var(--cyan);"></i>';
+      cardClass = "available";
+      actionHtml = `
+        <div class="quiz-action-bar">
+          <span class="quiz-status-msg">
+            <i class="fa-solid fa-circle-info" style="color:var(--cyan);"></i>
+            Test your domain knowledge to complete the curriculum.
+          </span>
+          <button class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="startFinalAssessment(false)">
+            <i class="fa-solid fa-circle-question"></i> Take Graded Assessment
+          </button>
+        </div>
+      `;
+    } else {
+      statusText = "Locked";
+      badgeClass = "badge-locked";
+      statusIcon = '<i class="fa-solid fa-lock"></i>';
+      cardClass = "locked";
+      actionHtml = `
+        <div class="quiz-action-bar">
+          <span class="quiz-status-msg">
+            <i class="fa-solid fa-lock" style="color:var(--muted);"></i>
+            Complete all ${modules.length} weekly modules to unlock the final graded assessment.
+          </span>
+        </div>
+      `;
+    }
+
+    const card = document.createElement("div");
+    card.className = `module-card final-assessment-card ${cardClass}`;
+    card.id = "module-card-final-assessment";
+    if (isUnlocked && !isCompleted) {
+      card.classList.add("expanded");
+    }
+
+    card.innerHTML = `
+      <div class="module-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="module-header-left">
+          <div class="module-icon-wrap">
+            ${statusIcon}
+          </div>
+          <div class="module-info-main">
+            <div class="module-meta-top">
+              <span class="module-week-tag">Final Exam</span>
+              <span class="module-badge ${badgeClass}">${statusText}</span>
+              <span class="module-category">Graded Assessment</span>
+            </div>
+            <div class="module-title">Domain Graded Assessment</div>
+            <p class="module-desc">Comprehensive test covering all topics from the ${currentGoalData.title} curriculum.</p>
+          </div>
+        </div>
+        <div class="module-header-right">
+          <div class="module-duration-info">
+            <span><i class="fa-regular fa-clock"></i> 20 Questions</span>
+            <span><i class="fa-solid fa-percent"></i> 70% Pass Mark</span>
+          </div>
+          <div class="module-chevron">
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+      </div>
+      <div class="module-body-wrap">
+        <div class="module-body">
+          <div class="topics-title">Assessment Guidelines</div>
+          <div class="topics-grid" style="grid-template-columns:1fr; gap:10px; margin-bottom:15px; font-size:0.9rem; color:var(--muted);">
+            <div>• The exam consists of 20 randomized questions drawn from all modules.</div>
+            <div>• You must answer at least 14 questions correctly (70%) to pass.</div>
+            <div>• You can retake the assessment as many times as you like.</div>
+          </div>
+          ${actionHtml}
+        </div>
+      </div>
+    `;
+
+    modulesContainer.appendChild(card);
+  }
+
+  window.startFinalAssessment = function(isRetake) {
+    quizModuleIndex = -99;
+    
+    // Gather all questions from current goal curriculum
+    let finalQuestionsPool = [];
+    currentGoalData.modules.forEach(m => {
+      m.quiz.forEach(q => {
+        finalQuestionsPool.push(q);
+      });
+    });
+
+    // Shuffle and pick 20 questions
+    let shuffled = finalQuestionsPool.sort(() => 0.5 - Math.random());
+    quizQuestions = shuffled.slice(0, 20);
+    quizQuestionIndex = 0;
+    
+    // Initialize answers as empty
+    quizAnswers = new Array(quizQuestions.length).fill(-1);
+
+    // Setup modal header texts
+    quizModuleWeek.textContent = `FINAL GRADED ASSESSMENT`;
+    quizModuleTitle.textContent = `${selectedGoal} Comprehensive Exam`;
+
+    // Reset views
+    quizQuestionBody.style.display = "block";
+    quizResultsView.style.display = "none";
+    quizPrevBtn.style.display = "flex";
+    quizNextBtn.innerHTML = `Next <i class="fa-solid fa-arrow-right"></i>`;
+    quizNextBtn.onclick = handleQuizNext;
+
+    renderQuizQuestion();
+
+    // Show modal overlay
+    quizOverlay.classList.add("active");
+  };
 
   function toggleExpand(week) {
     const card = document.getElementById(`module-card-${week}`);
@@ -497,6 +723,50 @@
     });
 
     const percent = Math.round((score / quizQuestions.length) * 100);
+    
+    if (quizModuleIndex === -99) {
+      const passed = percent >= 70;
+      quizQuestionBody.style.display = "none";
+      quizResultsView.style.display = "flex";
+      quizPrevBtn.style.display = "none";
+      quizProgressFill.style.width = "100%";
+
+      const progress = getRoadmapProgress();
+      if (!progress[selectedGoal]) {
+        progress[selectedGoal] = { highestUnlockedWeek: 1, scores: {} };
+      }
+      progress[selectedGoal].finalAssessmentScore = percent;
+      saveRoadmapProgress(progress);
+      roadmapProgress = progress;
+
+      if (passed) {
+        quizResultIcon.className = "quiz-results-badge passed";
+        quizResultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+        quizResultPercent.className = "quiz-results-score-percent passed";
+        quizResultPercent.textContent = `${percent}%`;
+        quizResultFraction.textContent = `${score} / ${quizQuestions.length} Correct`;
+        quizResultTitle.textContent = "Comprehensive Exam Passed!";
+        quizResultDesc.textContent = `Outstanding! You successfully passed the final graded assessment and completed your learning path.`;
+        
+        quizNextBtn.innerHTML = `Finish <i class="fa-solid fa-circle-xmark"></i>`;
+        quizNextBtn.onclick = closeQuizModal;
+      } else {
+        quizResultIcon.className = "quiz-results-badge failed";
+        quizResultIcon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+        quizResultPercent.className = "quiz-results-score-percent failed";
+        quizResultPercent.textContent = `${percent}%`;
+        quizResultFraction.textContent = `${score} / ${quizQuestions.length} Correct`;
+        quizResultTitle.textContent = "Assessment Failed";
+        quizResultDesc.textContent = `You scored ${percent}%. You need at least 70% (14 correct answers) to pass. Please review your weak areas and try again!`;
+        
+        quizNextBtn.innerHTML = `Retake Exam <i class="fa-solid fa-rotate-left"></i>`;
+        quizNextBtn.onclick = () => {
+          startFinalAssessment(false);
+        };
+      }
+      return;
+    }
+
     const passed = percent >= 80;
     const week = currentGoalData.modules[quizModuleIndex].week;
 
@@ -512,7 +782,7 @@
       progress[selectedGoal].scores[week] = percent;
 
       // If they passed the active highestUnlocked module, unlock next one!
-      if (week === progress[selectedGoal].highestUnlockedWeek && week < 10) {
+      if (week === progress[selectedGoal].highestUnlockedWeek && week < currentGoalData.totalWeeks) {
         progress[selectedGoal].highestUnlockedWeek = week + 1;
       }
       

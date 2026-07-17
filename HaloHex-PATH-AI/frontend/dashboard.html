@@ -125,18 +125,19 @@
     const goalProgress = progress[selectedGoal] || { highestUnlockedWeek: 1, scores: {} };
     
     // 3. Compute count of completed modules (where a score is saved)
+    const durationWeeks = CURRENT_USER.durationWeeks || 16;
     let completedCount = 0;
-    for (let k = 1; k <= 10; k++) {
+    for (let k = 1; k <= durationWeeks; k++) {
       if (goalProgress.scores[k] !== undefined) {
         completedCount++;
       }
     }
     
-    const percent = Math.round((completedCount / 10) * 100);
+    const percent = Math.round((completedCount / durationWeeks) * 100);
     
     // 4. Update DOM elements
     document.getElementById("dashProgress").innerHTML = `<i class="fa-solid fa-chart-line"></i>${percent}%`;
-    document.getElementById("dashWeeks").innerHTML = `<i class="fa-solid fa-flag-checkered"></i>${completedCount} / 10`;
+    document.getElementById("dashWeeks").innerHTML = `<i class="fa-solid fa-flag-checkered"></i>${completedCount} / ${durationWeeks}`;
   });
 </script>
 </body>

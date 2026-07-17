@@ -45,44 +45,119 @@
       </a>
     </div>
 
+    <!-- Steps Progress Indicator -->
+    <div class="steps-indicator" style="max-width: 500px; margin: 10px 0 25px;">
+      <div class="step-badge active" id="badge1">1 Career Goal</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-badge pending" id="badge2">2 Study Schedule</div>
+    </div>
+
     <!-- ============ FORM SECTION ============ -->
     <section id="formSection">
       <div class="glass-card form-card">
         <form id="roadmapForm">
-          <div class="field">
-            <label for="name">Your name</label>
-            <input type="text" id="name" placeholder="e.g. Ananya" required />
-          </div>
-
-          <div class="field">
-            <label for="goal">Career goal</label>
-            <input type="text" id="goal" placeholder="e.g. Machine Learning Engineer" required />
-          </div>
-
-          <div class="field-row">
+          
+          <!-- STEP 1: CAREER GOAL -->
+          <div class="step-content active" id="step1">
+            <h3 style="font-family:'Sora',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:8px;">What is your career goal?</h3>
+            <p class="step-desc" style="font-size:0.95rem; color:var(--muted); margin-bottom:24px;">Be specific — this determines your entire learning path</p>
+            
             <div class="field">
-              <label for="skillLevel">Current skill level</label>
-              <select id="skillLevel" required>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-              </select>
+              <input type="text" id="careerGoalInput" placeholder="e.g., Machine Learning Engineer" required />
             </div>
 
             <div class="field">
-              <label for="dailyHours">Daily study hours</label>
-              <input type="number" id="dailyHours" min="1" max="24" value="2" required />
+              <label>Popular goals:</label>
+              <div class="tag-select-list" id="popularGoalsList">
+                <button type="button" class="tag-pill-btn" data-value="Machine Learning Engineer">Machine Learning Engineer</button>
+                <button type="button" class="tag-pill-btn" data-value="Full Stack Developer">Full Stack Developer</button>
+                <button type="button" class="tag-pill-btn" data-value="Data Scientist">Data Scientist</button>
+                <button type="button" class="tag-pill-btn" data-value="DevOps Engineer">DevOps Engineer</button>
+                <button type="button" class="tag-pill-btn" data-value="Mobile Developer">Mobile Developer</button>
+                <button type="button" class="tag-pill-btn" data-value="Blockchain Developer">Blockchain Developer</button>
+              </div>
             </div>
 
             <div class="field">
-              <label for="duration">Duration (months)</label>
-              <input type="number" id="duration" min="1" max="36" value="6" required />
+              <label>Current experience level:</label>
+              <div class="choice-row" id="experienceLevelRow">
+                <button type="button" class="choice-btn active" data-level="Beginner">Beginner</button>
+                <button type="button" class="choice-btn" data-level="Intermediate">Intermediate</button>
+                <button type="button" class="choice-btn" data-level="Advanced">Advanced</button>
+              </div>
             </div>
           </div>
 
-          <button type="submit" class="btn-primary btn-block" id="submitBtn">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Learning Path
-          </button>
+          <!-- STEP 2: STUDY SCHEDULE -->
+          <div class="step-content" id="step2">
+            <h3 style="font-family:'Sora',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:8px;">Your study schedule</h3>
+            <p class="step-desc" style="font-size:0.95rem; color:var(--muted); margin-bottom:24px;">We'll pace your roadmap based on your availability</p>
+
+            <div class="field">
+              <label style="display:flex; justify-content:space-between;">
+                <span>Hours per day:</span>
+                <span id="hoursDisplayVal" style="color:var(--cyan); font-weight:700;">2h</span>
+              </label>
+              <div class="slider-container">
+                <input type="range" id="hoursSlider" class="slider-input" min="0.5" max="8" step="0.5" value="2" />
+                <div class="slider-labels">
+                  <span>0.5h</span>
+                  <span>8h</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label style="display:flex; justify-content:space-between;">
+                <span>Days per week:</span>
+                <span id="daysDisplayVal" style="color:var(--cyan); font-weight:700;">5 days</span>
+              </label>
+              <div class="choice-row" id="daysWeekRow">
+                <button type="button" class="choice-btn" data-days="1">1</button>
+                <button type="button" class="choice-btn" data-days="2">2</button>
+                <button type="button" class="choice-btn" data-days="3">3</button>
+                <button type="button" class="choice-btn" data-days="4">4</button>
+                <button type="button" class="choice-btn active" data-days="5">5</button>
+                <button type="button" class="choice-btn" data-days="6">6</button>
+                <button type="button" class="choice-btn" data-days="7">7</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label style="display:flex; justify-content:space-between;">
+                <span>Target duration:</span>
+                <span id="durationDisplayVal" style="color:var(--cyan); font-weight:700;">16 weeks</span>
+              </label>
+              <div class="choice-row" id="durationRow">
+                <button type="button" class="choice-btn" data-weeks="8">8w</button>
+                <button type="button" class="choice-btn" data-weeks="12">12w</button>
+                <button type="button" class="choice-btn active" data-weeks="16">16w</button>
+                <button type="button" class="choice-btn" data-weeks="24">24w</button>
+              </div>
+            </div>
+
+            <div class="schedule-summary-card">
+              <div class="summary-label">Estimated total study time</div>
+              <div class="summary-value" id="totalHoursDisplay">160 hours</div>
+              <div class="summary-formula" id="formulaDisplay">2h/day × 5 days × 16 weeks</div>
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="onboarding-actions">
+            <button type="button" class="btn-back-text hidden" id="btnBack">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            
+            <button type="button" class="btn-primary" id="btnContinue" style="margin: 0 0 0 auto;">
+              Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+            <button type="button" class="btn-primary hidden" id="btnGenerate" style="margin: 0 0 0 auto; background: linear-gradient(90deg, var(--indigo), var(--cyan)); box-shadow: 0 8px 30px rgba(34,211,238,0.25);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Path
+            </button>
+          </div>
+
         </form>
       </div>
     </section>
