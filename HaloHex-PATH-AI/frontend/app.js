@@ -53,15 +53,17 @@ function getNormalizedGoal(goal) {
 
 function getRoadmapProgress() {
   let progress = JSON.parse(localStorage.getItem("halohex_progress"));
-  if (!progress) {
+  if (!progress || !progress["Machine Learning"] || !progress["Full Stack Developer"]) {
     progress = {
       "Machine Learning": {
         highestUnlockedWeek: 1,
-        scores: {}
+        scores: {},
+        completedTopics: []
       },
       "Full Stack Developer": {
         highestUnlockedWeek: 1,
-        scores: {}
+        scores: {},
+        completedTopics: []
       }
     };
     localStorage.setItem("halohex_progress", JSON.stringify(progress));

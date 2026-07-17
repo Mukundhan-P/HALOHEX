@@ -143,9 +143,42 @@
   </div>
 </div>
 
+<!-- ============ STUDY NOTES MODAL ============ -->
+<div id="studyOverlay" class="study-overlay">
+  <div class="glass-card study-modal-card">
+    <div class="study-modal-header">
+      <div class="study-modal-title-wrap">
+        <span id="studyModuleWeek" class="study-modal-subtitle">WEEK 1 STUDY NOTES</span>
+        <span id="studyTopicTitle" class="study-modal-title">HTML5 Semantic Markup</span>
+      </div>
+      <button id="closeStudyBtn" class="study-modal-close-btn" aria-label="Close Study Notes">&times;</button>
+    </div>
+    
+    <!-- Study Content Container -->
+    <div id="studyContentBody" class="study-content-container">
+      <!-- Content renders here dynamically -->
+    </div>
+    
+    <div class="study-modal-footer">
+      <button id="studyMarkCompleteBtn" class="btn-primary study-btn-complete">
+        <i class="fa-regular fa-circle"></i> Mark as Completed
+      </button>
+      <button id="studyNextBtn" class="btn-secondary study-btn-next">
+        Next Topic <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="roadmapData.js"></script>
+<script src="studyNotesData.js"></script>
 <script src="app.js"></script>
 <script>
+  window.onerror = function(message, source, lineno, colno, error) {
+    alert("JS Error: " + message + " on line " + lineno + " in " + source);
+    return false;
+  };
+
   let selectedGoal = "";
   let roadmapProgress = {};
   let currentGoalData = {};
@@ -156,8 +189,21 @@
   let quizAnswers = [];
   let quizQuestions = [];
 
+  // Study states
+  let currentOpenTopic = "";
+  let currentOpenTopicWeek = -1;
+
   // DOM Elements
   const goalSelect = document.getElementById("goalSelect");
+  
+  // Study Modal DOM Elements
+  const studyOverlay = document.getElementById("studyOverlay");
+  const closeStudyBtn = document.getElementById("closeStudyBtn");
+  const studyModuleWeek = document.getElementById("studyModuleWeek");
+  const studyTopicTitle = document.getElementById("studyTopicTitle");
+  const studyContentBody = document.getElementById("studyContentBody");
+  const studyMarkCompleteBtn = document.getElementById("studyMarkCompleteBtn");
+  const studyNextBtn = document.getElementById("studyNextBtn");
   const roadmapTitle = document.getElementById("roadmapTitle");
   const roadmapSubtitle = document.getElementById("roadmapSubtitle");
   const statWeeks = document.getElementById("statWeeks");
@@ -331,10 +377,17 @@
       // Build topic elements
       let topicsHtml = "";
       mod.topics.forEach((topic) => {
+        const completedTopics = progress.completedTopics || [];
+        const isTopicCompleted = completedTopics.includes(topic.name);
+        const iconClass = isTopicCompleted ? "fa-solid fa-circle-check" : "fa-regular fa-file-lines";
+        const completedClass = isTopicCompleted ? "completed" : "";
+        const clickHandler = isLocked ? "" : `onclick="openStudyNotes('${escapeHtml(topic.name).replace(/'/g, "\\'")}', ${week})"`;
+        const cursorClass = isLocked ? "locked-topic" : "clickable-topic";
+        
         topicsHtml += `
-          <div class="topic-card">
+          <div class="topic-card ${completedClass} ${cursorClass}" ${clickHandler}>
             <div class="topic-card-left">
-              <i class="fa-regular fa-file-lines"></i>
+              <i class="${iconClass}" style="${isTopicCompleted ? 'color: #22c55e;' : ''}"></i>
               <span>${topic.name}</span>
             </div>
             <span class="topic-duration">${topic.duration}</span>
@@ -826,6 +879,147 @@
   closeQuizBtn.onclick = () => {
     quizOverlay.classList.remove("active");
     initPage();
+  };
+
+  // Study notes event handlers and helper functions
+  closeStudyBtn.onclick = () => {
+    studyOverlay.classList.remove("active");
+  };
+
+  studyMarkCompleteBtn.onclick = () => {
+    toggleTopicCompletion();
+  };
+
+  studyNextBtn.onclick = () => {
+    handleStudyNext();
+  };
+
+  window.openStudyNotes = function(topicName, week) {
+    currentOpenTopic = topicName;
+    currentOpenTopicWeek = week;
+    
+    // Find study notes
+    let notes = STUDY_NOTES_DATA[topicName];
+    if (!notes) {
+      notes = getFallbackStudyNotes(topicName);
+    }
+    
+    // Set headers
+    document.getElementById("studyModuleWeek").textContent = `WEEK ${week} STUDY NOTES (${notes.duration || '30min'})`;
+    document.getElementById("studyTopicTitle").textContent = topicName;
+    
+    // Set content body
+    studyContentBody.innerHTML = notes.content;
+    studyContentBody.scrollTop = 0; // Scroll to top
+    
+    // Setup Mark Completed Button
+    updateStudyModalButtons();
+    
+    // Open modal
+    studyOverlay.classList.add("active");
+  };
+
+  function updateStudyModalButtons() {
+    const progress = getRoadmapProgress();
+    const completedTopics = progress[selectedGoal].completedTopics || [];
+    const isCompleted = completedTopics.includes(currentOpenTopic);
+    
+    if (isCompleted) {
+      studyMarkCompleteBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Completed`;
+      studyMarkCompleteBtn.classList.add("completed-btn");
+    } else {
+      studyMarkCompleteBtn.innerHTML = `<i class="fa-regular fa-circle"></i> Mark as Completed`;
+      studyMarkCompleteBtn.classList.remove("completed-btn");
+    }
+    
+    // Setup Next Button
+    const nextInfo = getNextTopicInfo(currentOpenTopic);
+    if (nextInfo) {
+      if (nextInfo.isQuiz) {
+        studyNextBtn.innerHTML = `Take Assessment <i class="fa-solid fa-circle-question"></i>`;
+      } else {
+        studyNextBtn.innerHTML = `Next: ${nextInfo.topic.name} <i class="fa-solid fa-arrow-right"></i>`;
+      }
+      studyNextBtn.style.display = "flex";
+    } else {
+      studyNextBtn.style.display = "none";
+    }
+  }
+
+  function getNextTopicInfo(topicName) {
+    let found = false;
+    const modules = currentGoalData.modules;
+    
+    for (let m = 0; m < modules.length; m++) {
+      const mod = modules[m];
+      for (let t = 0; t < mod.topics.length; t++) {
+        const topic = mod.topics[t];
+        if (found) {
+          const progress = getRoadmapProgress();
+          const highestUnlocked = progress[selectedGoal].highestUnlockedWeek;
+          const nextTopicWeek = m + 1;
+          
+          if (nextTopicWeek > highestUnlocked) {
+            return { isQuiz: true, moduleIndex: currentOpenTopicWeek - 1 };
+          }
+          
+          return { isQuiz: false, topic: topic, week: nextTopicWeek };
+        }
+        if (topic.name === topicName) {
+          found = true;
+        }
+      }
+    }
+    
+    if (found) {
+      const progress = getRoadmapProgress();
+      const score = progress[selectedGoal].scores[currentOpenTopicWeek];
+      if (score === undefined) {
+        return { isQuiz: true, moduleIndex: currentOpenTopicWeek - 1 };
+      }
+    }
+    
+    return null;
+  }
+
+  window.toggleTopicCompletion = function() {
+    if (!currentOpenTopic) return;
+    
+    const progress = getRoadmapProgress();
+    if (!progress[selectedGoal].completedTopics) {
+      progress[selectedGoal].completedTopics = [];
+    }
+    
+    const index = progress[selectedGoal].completedTopics.indexOf(currentOpenTopic);
+    
+    if (index === -1) {
+      progress[selectedGoal].completedTopics.push(currentOpenTopic);
+      showToast(`Completed: ${currentOpenTopic}`);
+    } else {
+      progress[selectedGoal].completedTopics.splice(index, 1);
+      showToast(`Marked incomplete: ${currentOpenTopic}`, "fa-circle-info");
+    }
+    
+    saveRoadmapProgress(progress);
+    roadmapProgress = progress;
+    
+    updateStudyModalButtons();
+    renderModules();
+  };
+
+  window.handleStudyNext = function() {
+    const nextInfo = getNextTopicInfo(currentOpenTopic);
+    if (!nextInfo) return;
+    
+    if (nextInfo.isQuiz) {
+      studyOverlay.classList.remove("active");
+      const progress = getRoadmapProgress();
+      const score = progress[selectedGoal].scores[nextInfo.moduleIndex + 1];
+      const isRetake = score !== undefined;
+      startQuiz(nextInfo.moduleIndex, isRetake);
+    } else {
+      openStudyNotes(nextInfo.topic.name, nextInfo.week);
+    }
   };
 
   function escapeHtml(str) {
